@@ -1,0 +1,36 @@
+## https://github.com/chen3feng/blade-build/blob/master/doc/zh_CN/config.md
+
+global_config(
+  duplicated_source_action = 'error',
+  test_timeout = 600,  # 600s
+)
+
+cc_config(
+  extra_incs = [
+    "include",
+  ],
+  cxxflags = ['-std=gnu++2a'],
+  warnings = [
+    '-Wall',
+    '-Wextra',
+    '-Wno-unused-result',
+    '-Wno-sign-compare',
+    '-Wno-unused-parameter',
+  ],
+  benchmark_libs = ['#benchmark', '#pthread'],
+  benchmark_main_libs = ['#benchmark_main'],
+)
+
+cc_test_config(
+  dynamic_link = not build_target.is_debug(),
+  heap_check = 'strict',
+  gperftools_libs = '#tcmalloc',
+  gtest_libs = ['#gtest', '#pthread'],
+  gtest_main_libs = '#gtest_main',
+)
+
+proto_library_config(
+  protoc='protoc',
+  protobuf_libs='#protobuf',
+)
+
