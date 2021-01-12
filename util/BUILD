@@ -97,6 +97,10 @@ cc_library(
   name = 'options',
   hdrs = 'leveldb/options.h',
   srcs = 'options.cc',
+  deps = [
+    ':comparator',
+    ':env',
+  ]
 )
 
 cc_library(

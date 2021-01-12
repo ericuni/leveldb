@@ -33,12 +33,17 @@ cc_library(
   hdrs = 'format.h',
   srcs = 'format.cc',
   deps = [
+    '//util:coding',
+    '//util:status',
+    '//util:crc32c',
   ]
 )
 
 cc_library(
   name = 'block',
-  hdrs = [],
+  hdrs = [
+    'block.h',
+  ],
   srcs = [
     'block_builder.cc',
     'block.cc',
@@ -46,6 +51,10 @@ cc_library(
   ],
   deps = [
     ':iterator',
+    '//util:coding',
+    '//util:options',
+    '//util:filter_policy',
+    '//util:hash',
   ]
 )
 
@@ -54,6 +63,7 @@ cc_test(
   srcs = 'block_test.cc',
   deps = [
     ':block',
+    ':format',
   ]
 )
 
@@ -62,12 +72,14 @@ cc_test(
   srcs = 'filter_block_test.cc',
   deps = [
     ':block',
+    '//util:logging',
+    '//util:testutil',
   ]
 )
 
 cc_library(
   name = 'table',
-  hdrs = [],
+  hdrs = 'leveldb/table.h',
   srcs = [
     'table.cc',
     'table_builder.cc',
@@ -76,6 +88,7 @@ cc_library(
     ':block',
     ':format',
     ':two_level_iterator',
+    '//util:crc32c',
   ]
 )
 
