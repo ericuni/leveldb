@@ -88,47 +88,59 @@ cc_test(
 )
 
 cc_library(
-  name = 'util',
-  hdrs = [
-    'leveldb/filter_policy.h',
-    'leveldb/comparator.h',
-    'leveldb/options.h',
-    'histogram.h',
-  ],
-  srcs = [
-    'bloom.cc',
-    'comparator.cc',
-    'filter_policy.cc',
-    'histogram.cc',
-    'options.cc',
-  ],
-  deps = [
-    ':arena',
-    ':coding',
-    ':cache',
-    ':crc32c',
-    ':env',
-    ':logging',
-    ':status',
-    ':hash',
-  ],
+  name = 'histogram',
+  hdrs = 'histogram.h',
+  srcs = 'histogram.cc',
 )
 
-cc_test(
-  name = 'bloom_test',
-  srcs = 'bloom_test.cc',
+cc_library(
+  name = 'options',
+  hdrs = 'leveldb/options.h',
+  srcs = 'options.cc',
+)
+
+cc_library(
+  name = 'comparator',
+  hdrs = 'leveldb/comparator.h',
+  srcs = 'comparator.cc',
   deps = [
-    ':util',
-    ':testutil',
     ':logging',
-  ],
+  ]
 )
 
 cc_test(
   name = 'comparator_test',
   srcs = 'comparator_test.cc',
   deps = [
-    ':util',
+    ':comparator',
+  ],
+)
+
+cc_library(
+  name = 'filter_policy',
+  hdrs = 'leveldb/filter_policy.h',
+  srcs = [
+    'filter_policy.cc',
+  ]
+)
+
+cc_library(
+  name = 'bloom',
+  hdrs = [],
+  srcs = 'bloom.cc',
+  deps = [
+    ':filter_policy',
+    ':hash',
+  ]
+)
+
+cc_test(
+  name = 'bloom_test',
+  srcs = 'bloom_test.cc',
+  deps = [
+    ':bloom',
+    ':testutil',
+    ':logging',
   ],
 )
 
