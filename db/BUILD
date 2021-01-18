@@ -17,33 +17,11 @@ cc_test(
   ],
 )
 
-cc_library(
-  name = 'dbformat',
-  hdrs = 'dbformat.h',
-  srcs = 'dbformat.cc',
-  deps = [
-    '//util:coding',
-    '//util:filter_policy',
-    '//util:comparator',
-  ]
-)
-
 cc_test(
   name = 'dbformat_test',
   srcs = 'dbformat_test.cc',
   deps = [
-    ':dbformat',
-  ]
-)
-
-cc_library(
-  name = 'memtable',
-  hdrs = 'memtable.h',
-  srcs = 'memtable.cc',
-  deps = [
-    ':skiplist',
-    ':dbformat',
-    '//table:iterator',
+    '//:leveldb',
   ]
 )
 
@@ -51,18 +29,7 @@ cc_test(
   name = 'memtable_test',
   srcs = 'memtable_test.cc',
   deps = [
-    ':memtable',
-    ':dbformat',
-  ],
-)
-
-cc_library(
-  name = 'write_batch',
-  hdrs = 'write_batch.h',
-  srcs = 'write_batch.cc',
-  deps = [
-    ':memtable',
-    ':dbformat',
+    '//:leveldb',
   ],
 )
 
@@ -70,8 +37,7 @@ cc_test(
   name = 'write_batch_test',
   srcs = 'write_batch_test.cc',
   deps = [
-    ':write_batch',
-    ':memtable',
+    '//:leveldb',
   ]
 )
 
@@ -101,28 +67,18 @@ cc_test(
   ],
 )
 
-cc_library(
-  name = 'version_edit',
-  hdrs = 'version_edit.h',
-  srcs = 'version_edit.cc',
-  deps = [
-    ':dbformat',
-    '//util:status',
-  ]
-)
-
 cc_test(
   name = 'version_edit_test',
   srcs = 'version_edit_test.cc',
   deps = [
-    ':version_edit',
+    '//:leveldb',
   ]
 )
 
 cc_test(
-  name = 'db_impl_test',
-  srcs = 'db_impl_test.cc',
+  name = 'filename_test',
+  srcs = 'filename_test.cc',
   deps = [
+    '//:leveldb',
   ]
 )
-
