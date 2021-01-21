@@ -4,6 +4,8 @@
 
 #include "db/db_iter.h"
 
+#include <glog/logging.h>
+
 #include "db/db_impl.h"
 #include "db/dbformat.h"
 #include "db/filename.h"

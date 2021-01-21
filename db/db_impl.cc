@@ -11,6 +11,7 @@
 #include <set>
 #include <string>
 #include <vector>
+#include <glog/logging.h>
 
 #include "db/builder.h"
 #include "db/db_iter.h"
@@ -1220,6 +1221,8 @@ Status DBImpl::Write(const WriteOptions& options, WriteBatch* updates) {
     // during this phase since &w is currently responsible for logging
     // and protects against concurrent loggers and concurrent writes
     // into mem_.
+    // 下面虽然把锁释放掉了, 但是因为w 还是writers_ 队列的front, 然后其他线程即使进到了Write 函数, 也最多只能把任务加到
+    // writers_ 队列尾部, 然后就进入到 while 循环中去wait 了. 所以下面的逻辑实际上是单线程的.
     {
       mutex_.Unlock();
       status = log_->AddRecord(WriteBatchInternal::Contents(write_batch));
@@ -1254,6 +1257,7 @@ Status DBImpl::Write(const WriteOptions& options, WriteBatch* updates) {
       ready->done = true;
       ready->cv.Signal();
     }
+    // 自己已经是醒着的状态, 所以不需要调 ready->cv.Signal()
     if (ready == last_writer) break;
   }
 

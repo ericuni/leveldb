@@ -8,6 +8,7 @@
 using namespace std::literals;
 
 DEFINE_string(path, "/root/git/leveldb/learn/db", "db path");
+DEFINE_string(key, "key", "");
 
 namespace wcg {
 
@@ -25,15 +26,21 @@ int main() {
 
 	leveldb::ReadOptions read_options;
 	auto it = db->NewIterator(read_options);
-	it->SeekToFirst();
+  it->Seek(FLAGS_key);
+  auto count = 0;
 	while (it->Valid()) {
 		auto key = it->key();
 		auto value = it->value();
 		LOG(INFO) << key.ToString() << " -> " << value.ToString();
 
 		it->Next();
+    ++count;
+    if (count >= 5) {
+      break;
+    }
 	}
 
+  delete it;
   delete db;
   return 0;
 }

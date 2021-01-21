@@ -333,6 +333,7 @@ SkipList<Key, Comparator>::SkipList(Comparator cmp, Arena* arena)
   }
 }
 
+// memtable 写 skiplist 是单线程的
 template <typename Key, class Comparator>
 void SkipList<Key, Comparator>::Insert(const Key& key) {
   // TODO(opt): We can use a barrier-free variant of FindGreaterOrEqual()
@@ -355,6 +356,9 @@ void SkipList<Key, Comparator>::Insert(const Key& key) {
     // the loop below.  In the former case the reader will
     // immediately drop to the next level since nullptr sorts after all
     // keys.  In the latter case the reader will use the new node.
+    // relaxed ordering 仅仅保证load 和store 是原子操作,除此之外,不提供任何跨线程的同步, 也就是一个线程store, 随后另外一
+    // 个线程load, 可能读到的是old value, 因为可能是从寄存器或者cpu cache 中读的, 即使是从内存中读的, 调用store 的线程写
+    // 的结果也可能还在寄存器或者cpu cache 中而没有刷回内存.
     max_height_.store(height, std::memory_order_relaxed);
   }
 
