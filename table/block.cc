@@ -163,9 +163,6 @@ class Block::Iter : public Iterator {
   }
 
   void Seek(const Slice& target) override {
-    LOG(INFO) << "block iterator: "
-      << comparator_->Name()
-      << " " << target.size() << " " << target.ToString();
     // Binary search in restart array to find the last restart point
     // with a key < target
     uint32_t left = 0;
