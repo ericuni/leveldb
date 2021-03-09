@@ -105,6 +105,7 @@ int FindFile(const InternalKeyComparator& icmp,
   return right;
 }
 
+// [f->smallest, f->largest] user_key
 static bool AfterFile(const Comparator* ucmp, const Slice* user_key,
                       const FileMetaData* f) {
   // null user_key occurs before all keys and is therefore never after *f
@@ -112,6 +113,7 @@ static bool AfterFile(const Comparator* ucmp, const Slice* user_key,
           ucmp->Compare(*user_key, f->largest.user_key()) > 0);
 }
 
+// user_key [f->smallest, f->largest]
 static bool BeforeFile(const Comparator* ucmp, const Slice* user_key,
                        const FileMetaData* f) {
   // null user_key occurs after all keys and is therefore never before *f
@@ -145,6 +147,8 @@ bool SomeFileOverlapsRange(const InternalKeyComparator& icmp,
     // Find the earliest possible internal key for smallest_user_key
     InternalKey small_key(*smallest_user_key, kMaxSequenceNumber,
                           kValueTypeForSeek);
+    // search small_key over largest key of files
+    // f1->largest, f2->largest, f3->largest, ... , fn->largest
     index = FindFile(icmp, files, small_key.Encode());
   }
 
@@ -153,6 +157,12 @@ bool SomeFileOverlapsRange(const InternalKeyComparator& icmp,
     return false;
   }
 
+  // possible situations:
+  // idx = index
+  // 1. f_(idx-1)->smallest, f_(idx-1)->largest, smallest_user_key, largest_user_key, f_idx->smallest, f_idx->largest
+  // 2. f_(idx-1)->smallest, f_(idx-1)->largest, smallest_user_key, f_idx->smallest, largest_user_key, f_idx->largest
+  // 3. f_(idx-1)->smallest, f_(idx-1)->largest, f_idx->smallest, smallest_user_key, largest_user_key, f_idx->largest
+  // 所以还需要检查 largest_user_key 的位置, 只有第一种情况是没有overlap 的
   return !BeforeFile(ucmp, largest_user_key, files[index]);
 }
 
@@ -601,6 +611,7 @@ class VersionSet::Builder {
     BySmallestKey cmp;
     cmp.internal_comparator = &vset_->icmp_;
     for (int level = 0; level < config::kNumLevels; level++) {
+      // added_files 是指针, 所以需要初始化
       levels_[level].added_files = new FileSet(cmp);
     }
   }
@@ -681,8 +692,11 @@ class VersionSet::Builder {
       std::vector<FileMetaData*>::const_iterator base_end = base_files.end();
       const FileSet* added_files = levels_[level].added_files;
       v->files_[level].reserve(base_files.size() + added_files->size());
+      // added_files 是有序的, base_files 也是有序的, 把两个有序的混合成一个有序的
       for (const auto& added_file : *added_files) {
         // Add all smaller files listed in base_
+        // std::upper_bound: returns an iterator pointing to the first element in the range that is greater than value,
+        // or last if no such element is found.
         for (std::vector<FileMetaData*>::const_iterator bpos =
                  std::upper_bound(base_iter, base_end, added_file, cmp);
              base_iter != bpos; ++base_iter) {
