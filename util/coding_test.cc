@@ -190,6 +190,48 @@ TEST(Coding, Strings) {
   ASSERT_EQ("", input.ToString());
 }
 
+TEST(Coding, EncodeVarint32DecodeVarint64) {
+  std::string buffer;
+
+  uint32_t value = 100;
+  PutVarint32(&buffer, value);
+
+  {
+    uint32_t v32 = 0;
+    Slice slice(buffer);
+    GetVarint32(&slice, &v32);
+    ASSERT_EQ(value, v32);
+  }
+
+  {
+    uint64_t v64 = 0;
+    Slice slice = buffer;
+    GetVarint64(&slice, &v64);
+    ASSERT_EQ(value, v64);
+  }
+}
+
+TEST(Coding, EncodeVarint64DecodeVarint32) {
+  std::string buffer;
+
+  uint64_t value = 100;
+  PutVarint64(&buffer, value);
+
+  {
+    uint64_t v64 = 0;
+    Slice slice(buffer);
+    GetVarint64(&slice, &v64);
+    ASSERT_EQ(value, v64);
+  }
+
+  {
+    uint32_t v32 = 0;
+    Slice slice = buffer;
+    GetVarint32(&slice, &v32);
+    ASSERT_EQ(value, v32);
+  }
+}
+
 }  // namespace leveldb
 
 int main(int argc, char** argv) {
