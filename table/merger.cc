@@ -44,6 +44,7 @@ class MergingIterator : public Iterator {
     direction_ = kReverse;
   }
 
+  // target is internal key format
   void Seek(const Slice& target) override {
     for (int i = 0; i < n_; i++) {
       children_[i].Seek(target);

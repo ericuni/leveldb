@@ -183,6 +183,7 @@ typename SkipList<Key, Comparator>::Node* SkipList<Key, Comparator>::NewNode(
     const Key& key, int height) {
   char* const node_memory = arena_->AllocateAligned(
       sizeof(Node) + sizeof(std::atomic<Node*>) * (height - 1));
+  // placement new, https://stackoverflow.com/questions/222557/what-uses-are-there-for-placement-new
   return new (node_memory) Node(key);
 }
 
@@ -257,6 +258,25 @@ bool SkipList<Key, Comparator>::KeyIsAfterNode(const Key& key, Node* n) const {
   return (n != nullptr) && (compare_(n->key, key) < 0);
 }
 
+/*
+example from https://zhuanlan.zhihu.com/p/33674267
+max height = 4
+level
+3    |    | --------> | | -------------------------------------------------------> |   |
+2    |    | --------> | | ---------------------------------------> |  | ---------> |   |
+1    |    | --------> | | --------> | | -------------------------> |  | ---------> |   |
+0    |head| -> |3| -> |6| -> |7| -> |9| -> |12| -> |19| -> |21| -> |25| -> |26| -> |nil|
+
+after call FindGreaterOrEqual(17, prev)
+19 is returned, and
+prev[3] = 6
+prev[2] = 6
+prev[1] = 9
+prev[0] = 12
+so prev is just like prev in traditional sorted linked list, when we want to insert 17 into a sorted linked list, we
+first find the samllest node after 17, that is 19, as we also adjust the next pointer of 12, so we rememeber 12, that's
+the point of prev.
+*/
 template <typename Key, class Comparator>
 typename SkipList<Key, Comparator>::Node*
 SkipList<Key, Comparator>::FindGreaterOrEqual(const Key& key,
@@ -321,6 +341,11 @@ typename SkipList<Key, Comparator>::Node* SkipList<Key, Comparator>::FindLast()
   }
 }
 
+// TODO: Key is undetermined, why could we use 0 as the first argument of NewNode
+// in reality, we found that leveldb has only used skiplist in two places.
+// one is skiplist_test.cc, in which Key is uint64, so 0 is valid;
+// another is memtable.h, in which Key is const char*, so 0 is also valid.
+/// if we want to use skiplist in other places, we must make sure that 0 is a valid Key type value.
 template <typename Key, class Comparator>
 SkipList<Key, Comparator>::SkipList(Comparator cmp, Arena* arena)
     : compare_(cmp),
@@ -333,10 +358,15 @@ SkipList<Key, Comparator>::SkipList(Comparator cmp, Arena* arena)
   }
 }
 
+// memtable 写 skiplist 是单线程的
 template <typename Key, class Comparator>
 void SkipList<Key, Comparator>::Insert(const Key& key) {
   // TODO(opt): We can use a barrier-free variant of FindGreaterOrEqual()
   // here since Insert() is externally synchronized.
+  // TODO: 可以吗?
+  // 里面说的 barrier-free variant of FindGreaterOrEqual() 是把其中用到的Next 换成 NoBarrier_Next 吗?
+  // 下一次执行写任务可能是另外一个线程(比如 thread 2)了, thread 1用release 把新节点publish 出去后, thread 2 如
+  // 果用了 relaxed 模式去读, 好像不能保证一定能看到 thread 1 新publish 出去的结果吧.
   Node* prev[kMaxHeight];
   Node* x = FindGreaterOrEqual(key, prev);
 
@@ -355,6 +385,9 @@ void SkipList<Key, Comparator>::Insert(const Key& key) {
     // the loop below.  In the former case the reader will
     // immediately drop to the next level since nullptr sorts after all
     // keys.  In the latter case the reader will use the new node.
+    // relaxed ordering 仅仅保证load 和store 是原子操作,除此之外,不提供任何跨线程的同步, 也就是一个线程store, 随后另外一
+    // 个线程也以relaxed 模式来load, 可能读到的是old value, 因为可能是从寄存器或者cpu cache 中读的, 即使是从内存中读的,
+    // 调用store 的线程写的结果也可能还在寄存器或者cpu cache 中而没有刷回内存.
     max_height_.store(height, std::memory_order_relaxed);
   }
 
@@ -362,6 +395,7 @@ void SkipList<Key, Comparator>::Insert(const Key& key) {
   for (int i = 0; i < height; i++) {
     // NoBarrier_SetNext() suffices since we will add a barrier when
     // we publish a pointer to "x" in prev[i].
+    // 因为外面调用Insert 没有并发问题的, 所以 prev[i]->NoBarrier_Next(i) 也可以用 relaxed
     x->NoBarrier_SetNext(i, prev[i]->NoBarrier_Next(i));
     prev[i]->SetNext(i, x);
   }

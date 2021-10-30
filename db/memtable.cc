@@ -53,6 +53,9 @@ class MemTableIterator : public Iterator {
   ~MemTableIterator() override = default;
 
   bool Valid() const override { return iter_.Valid(); }
+  // k is internal key format
+  // but entry in skiplist is in format: varint32(internal key size), internal key, varint32(value size), value
+  // so before seeking, we need call EncodeKey first to add varint32(internal key size)
   void Seek(const Slice& k) override { iter_.Seek(EncodeKey(&tmp_, k)); }
   void SeekToFirst() override { iter_.SeekToFirst(); }
   void SeekToLast() override { iter_.SeekToLast(); }

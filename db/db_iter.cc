@@ -171,6 +171,10 @@ void DBIter::Next() {
     }
   }
 
+  // 因为iter_ 已经是一个valid 的entry, 对于用户层来说, 一个user key 最多只能对应一个value, 而iter_ 已经是一个valid的了,
+  // 所以所有与iter_ 的user key 相等的entry(user key 一样, 但是sequence number 比iter_ 当前的小) 都需要skip 掉,因此这里
+  // 需要传true.
+  // 而在Seek 函数那里, 因为是第一次, 所以需要传false
   FindNextUserEntry(true, &saved_key_);
 }
 
@@ -189,6 +193,8 @@ void DBIter::FindNextUserEntry(bool skipping, std::string* skip) {
           skipping = true;
           break;
         case kTypeValue:
+          // 如果skipping 是true, 只能说明前面碰到了一个 kTypeDeletion 的entry. 如果是这种情况, 应该只能在ikey.user_key
+          // 与 *skip 相等的情况下才能继续skip 啊, 不可能随着遍历的进行, 出现 < 0 的情形. 当然这里可能只是防御性编程.
           if (skipping &&
               user_comparator_->Compare(ikey.user_key, *skip) <= 0) {
             // Entry hidden
@@ -279,8 +285,10 @@ void DBIter::Seek(const Slice& target) {
   direction_ = kForward;
   ClearSavedValue();
   saved_key_.clear();
+  // saved_key_ is internal key format
   AppendInternalKey(&saved_key_,
                     ParsedInternalKey(target, sequence_, kValueTypeForSeek));
+  // saved_key_ is internal key format
   iter_->Seek(saved_key_);
   if (iter_->Valid()) {
     FindNextUserEntry(false, &saved_key_ /* temporary storage */);

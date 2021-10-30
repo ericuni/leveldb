@@ -6,3 +6,11 @@
 # Build directory.
 build/
 out/
+blade-bin
+build64_release
+learn/db
+
+bazel-bin
+bazel-leveldb
+bazel-out
+bazel-testlogs

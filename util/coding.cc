@@ -56,6 +56,7 @@ char* EncodeVarint64(char* dst, uint64_t v) {
   static const int B = 128;
   uint8_t* ptr = reinterpret_cast<uint8_t*>(dst);
   while (v >= B) {
+    // 在 1.9.0 版本的时候, 这里是 *(ptr++) = (v & (B-1)) | B;
     *(ptr++) = v | B;
     v >>= 7;
   }

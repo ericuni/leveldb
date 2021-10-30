@@ -1225,6 +1225,9 @@ Status DBImpl::Write(const WriteOptions& options, WriteBatch* updates) {
     // during this phase since &w is currently responsible for logging
     // and protects against concurrent loggers and concurrent writes
     // into mem_.
+    // 下面虽然把锁释放掉了, 但是因为w 还是writers_ 队列的front, 然后其他线程即使进到了Write 函数, 也最多只能把任务加到
+    // writers_ 队列尾部, 然后就进入到 while 循环中去wait 了. 所以下面的逻辑实际上是单线程的.
+    // 这里之所以要释放锁, 是为了不阻塞其他线程往writers_ 队列追加.
     {
       mutex_.Unlock();
       status = log_->AddRecord(WriteBatchInternal::Contents(write_batch));
@@ -1251,6 +1254,7 @@ Status DBImpl::Write(const WriteOptions& options, WriteBatch* updates) {
     versions_->SetLastSequence(last_sequence);
   }
 
+  // writers_: w -> w1 -> w2 -> ... -> last_writer -> ...
   while (true) {
     Writer* ready = writers_.front();
     writers_.pop_front();
@@ -1259,6 +1263,7 @@ Status DBImpl::Write(const WriteOptions& options, WriteBatch* updates) {
       ready->done = true;
       ready->cv.Signal();
     }
+    // w 自己已经是醒着的状态, 所以不需要调 ready->cv.Signal()
     if (ready == last_writer) break;
   }
 
@@ -1307,10 +1312,12 @@ WriteBatch* DBImpl::BuildBatchGroup(Writer** last_writer) {
       }
 
       // Append to *result
+      // 如果 writers_ 队列中就只有一个writer batch, 那么就i不会进入到for 循环中, 这种情况下, result 就是一开始初始化的
+      // first->batch
       if (result == first->batch) {
         // Switch to temporary batch instead of disturbing caller's batch
         result = tmp_batch_;
-        assert(WriteBatchInternal::Count(result) == 0);
+        assert(WriteBatchInternal::Count(result) == 0);  // tmp_batch_ 每次被用完后, 都被清空了.
         WriteBatchInternal::Append(result, first->batch);
       }
       WriteBatchInternal::Append(result, w->batch);
