@@ -2,12 +2,12 @@
 #include <gflags/gflags.h>
 #include <glog/logging.h>
 #include <memory>
+#include <random>
 
 #include "leveldb/db.h"
 #include "leveldb/env.h"
 #include "leveldb/filter_policy.h"
 #include "leveldb/options.h"
-#include "util/random.h"
 
 using namespace std::literals;
 
@@ -34,7 +34,9 @@ int main() {
     return -1;
   }
 
-  leveldb::Random rnd(0xdeadbeef);
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_int_distribution<> distribution(1, 5);
 
   leveldb::WriteOptions writeOptions;
   auto max_len = 1024;
@@ -44,7 +46,7 @@ int main() {
     snprintf(key.get(), max_len, "key_%d", i);
     snprintf(value.get(), max_len, "value_%d", i);
 
-    if (rnd.OneIn(5)) {
+    if (distribution(gen) == 1) {
       status = db->Delete(writeOptions, key.get());
       if (!status.ok()) {
         LOG(ERROR) << "delete " << key.get() << " error";
@@ -58,7 +60,7 @@ int main() {
       return -1;
     }
 
-    if (rnd.OneIn(5)) {
+    if (distribution(gen) == 1) {
       status = db->Delete(writeOptions, key.get());
       if (!status.ok()) {
         LOG(ERROR) << "delete " << key.get() << " error";

@@ -1,0 +1,34 @@
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+  name = 'leveldb',
+  hdrs = glob(['leveldb/*.h']),
+  srcs = ["build/libleveldb.a"],
+  includes = ["include"],
+  deps = [':init'],
+)
+
+cc_library(
+  name = 'init',
+  hdrs = [],
+  deps = [
+    ':google',
+  ],
+)
+
+cc_library(
+  name = 'google',
+  hdrs = [],
+  deps = [
+    '@com_google_glog//:glog',
+    '@com_github_gflags_gflags//:gflags',
+    '@com_google_gtest//:gtest',
+  ],
+)
+
+cc_library(
+  name = 'gtest',
+  hdrs = [],
+  deps = ['@com_google_gtest//:gtest_main'],
+)
+
