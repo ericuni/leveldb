@@ -5,8 +5,6 @@
 #include "leveldb/options.h"
 #include "leveldb/filter_policy.h"
 
-using namespace std::literals;
-
 DEFINE_string(path, "/root/git/leveldb/learn/db", "db path");
 DEFINE_string(key, "key", "");
 
