@@ -80,6 +80,8 @@ class PosixLogger final : public Logger {
       // Print the message into the buffer.
       std::va_list arguments_copy;
       va_copy(arguments_copy, arguments);
+      // Return Value of vsnprintf: The number of characters that would have been written if n had been sufficiently
+      // large, not counting the terminating null character.
       buffer_offset +=
           std::vsnprintf(buffer + buffer_offset, buffer_size - buffer_offset,
                          format, arguments_copy);
