@@ -1203,6 +1203,7 @@ Status DBImpl::Write(const WriteOptions& options, WriteBatch* updates) {
   w.sync = options.sync;
   w.done = false;
 
+  // writers_ 是整个db 实例共享的, 所以修改前需要加锁
   MutexLock l(&mutex_);
   writers_.push_back(&w);
   while (!w.done && &w != writers_.front()) {
@@ -1290,6 +1291,7 @@ WriteBatch* DBImpl::BuildBatchGroup(Writer** last_writer) {
   // original write is small, limit the growth so we do not slow
   // down the small write too much.
   size_t max_size = 1 << 20;
+  // 128 << 10: 1 << 17
   if (size <= (128 << 10)) {
     max_size = size + (128 << 10);
   }
@@ -1316,8 +1318,9 @@ WriteBatch* DBImpl::BuildBatchGroup(Writer** last_writer) {
       // first->batch
       if (result == first->batch) {
         // Switch to temporary batch instead of disturbing caller's batch
+        // tmp_batch_ 每次被用完后, 都被清空了.
         result = tmp_batch_;
-        assert(WriteBatchInternal::Count(result) == 0);  // tmp_batch_ 每次被用完后, 都被清空了.
+        assert(WriteBatchInternal::Count(result) == 0);
         WriteBatchInternal::Append(result, first->batch);
       }
       WriteBatchInternal::Append(result, w->batch);
@@ -1551,6 +1554,7 @@ Status DestroyDB(const std::string& dbname, const Options& options) {
       if (ParseFileName(filenames[i], &number, &type) &&
           type != kDBLockFile) {  // Lock file will be deleted at end
         Status del = env->RemoveFile(dbname + "/" + filenames[i]);
+        // 最外层if 进来的时候, result 肯定是ok 的, 但是在for 循环中, del 可能不为ok, 所以result 会记录下第一个不ok 的del
         if (result.ok() && !del.ok()) {
           result = del;
         }
