@@ -70,19 +70,6 @@ Slice BlockBuilder::Finish() {
 }
 
 void BlockBuilder::Add(const Slice& key, const Slice& value) {
-  if (options_->block_restart_interval == 1) {
-  LOG(INFO) << "index."
-    << " comparator: " << options_->comparator->Name()
-    << " restart point: " << options_->block_restart_interval
-    << " key: " << key.size() << " " << key.ToString()
-    << " value: " << value.size() << " " << value.ToString();
-  } else {
-  LOG_EVERY_N(INFO, 100) << "non-index."
-    << " comparator: " << options_->comparator->Name()
-    << " restart point: " << options_->block_restart_interval
-    << " key: " << key.size() << " " << key.ToString()
-    << " value: " << value.size() << " " << value.ToString();
-  }
   Slice last_key_piece(last_key_);
   assert(!finished_);
   assert(counter_ <= options_->block_restart_interval);
