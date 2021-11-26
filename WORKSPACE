@@ -17,9 +17,9 @@ http_archive(
 )
 
 http_archive(
-    name = "com_google_gtest",  # 2021-07-09T13:28:13Z
-    sha256 = "12ef65654dc01ab40f6f33f9d02c04f2097d2cd9fbe48dc6001b29543583b0ad",
-    strip_prefix = "googletest-8d51ffdfab10b3fba636ae69bc03da4b54f8c235",
-    urls = ["https://github.com/google/googletest/archive/8d51ffdfab10b3fba636ae69bc03da4b54f8c235.zip"],
+    name = "com_google_gtest",
+    sha256 = "9dc9157a9a1551ec7a7e43daea9a694a0bb5fb8bec81235d8a1e6ef64c716dcb",
+    strip_prefix = "googletest-release-1.10.0",
+    urls = ["https://github.com/google/googletest/archive/refs/tags/release-1.10.0.tar.gz"],
 )
 
