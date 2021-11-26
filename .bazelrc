@@ -1,3 +1,3 @@
-build --copt -std=c++2a
+build --copt -std=c++17
 build --linkopt -lsnappy
 build --linkopt -lglog
