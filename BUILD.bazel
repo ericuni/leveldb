@@ -2,7 +2,7 @@ package(default_visibility = ["//visibility:public"])
 
 cc_library(
   name = 'leveldb',
-  hdrs = glob(['leveldb/*.h']),
+  hdrs = glob(['include/leveldb/*.h']),
   srcs = ["build/libleveldb.a"],
   includes = ["include"],
   deps = [':init'],
