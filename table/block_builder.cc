@@ -30,7 +30,6 @@
 
 #include <algorithm>
 #include <cassert>
-#include <glog/logging.h>
 
 #include "leveldb/comparator.h"
 #include "leveldb/options.h"
