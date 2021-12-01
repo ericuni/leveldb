@@ -5,7 +5,7 @@
 #include "leveldb/options.h"
 #include "leveldb/filter_policy.h"
 
-DEFINE_string(path, "/root/git/leveldb/learn/db", "db path");
+DEFINE_string(path, "./db", "db path");
 DEFINE_string(key, "key", "");
 
 namespace wcg {

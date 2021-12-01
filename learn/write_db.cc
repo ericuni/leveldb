@@ -9,7 +9,7 @@
 #include "leveldb/filter_policy.h"
 #include "leveldb/options.h"
 
-DEFINE_string(path, "/root/git/leveldb/learn/db", "db path");
+DEFINE_string(path, "./db", "db path");
 DEFINE_int32(n, 20 * 10000, "number of records");
 
 namespace wcg {
