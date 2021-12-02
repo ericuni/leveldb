@@ -19,11 +19,11 @@ cc_library(
     exclude = ["doc/**"],
   ),
   includes = ["include"],
-  deps = [':init'],
   copts = [
     '-DLEVELDB_HAS_PORT_CONFIG_H',
     '-DLEVELDB_PLATFORM_POSIX',
   ],
+  deps = [':init'],
 )
 
 cc_library(
