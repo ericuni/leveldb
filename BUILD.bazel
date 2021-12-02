@@ -1,19 +1,35 @@
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
-  name = 'leveldb',
-  hdrs = glob(['include/leveldb/*.h']),
-  srcs = ["build/libleveldb.a"],
+  name = "leveldb",
+  srcs = glob(
+    ["**/*.cc"],
+    exclude = [
+      "doc/**",
+      "**/*_test.cc",
+      "db/leveldbutil.cc",
+      "db/db_bench.cc",
+      "learn/*.cc",
+      "util/env_windows.cc",
+      "benchmarks/*",
+    ],
+  ),
+  hdrs = glob(
+    ["**/*.h"],
+    exclude = ["doc/**"],
+  ),
   includes = ["include"],
   deps = [':init'],
+  copts = [
+    '-DLEVELDB_HAS_PORT_CONFIG_H',
+    '-DLEVELDB_PLATFORM_POSIX',
+  ],
 )
 
 cc_library(
   name = 'init',
   hdrs = [],
-  deps = [
-    ':google',
-  ],
+  deps = [':google'],
 )
 
 cc_library(
