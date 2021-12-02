@@ -1,5 +1,7 @@
 package(default_visibility = ["//visibility:public"])
 
+load("@rules_foreign_cc//foreign_cc:defs.bzl", "cmake")
+
 cc_library(
   name = 'leveldb',
   hdrs = glob(['include/leveldb/*.h']),
@@ -30,5 +32,18 @@ cc_library(
   name = 'gtest',
   hdrs = [],
   deps = ['@com_google_gtest//:gtest_main'],
+)
+
+filegroup(
+  name = 'srcs',
+  srcs = glob(['CMakeLists.txt', 'cmake/**', 'include/**', 'table/**', 'util/**', 'db/**', 'port/**', 'third_party/**/**/**/**', 'helpers/**']),
+)
+
+cmake(
+  name = 'leveldb2',
+  lib_source = ':srcs',
+  out_include_dir = 'include/leveldb',
+  out_static_libs = ['../leveldb2.build_tmpdir/libleveldb.a'],
+  #out_lib_dir = 'build',
 )
 
