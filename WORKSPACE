@@ -23,3 +23,9 @@ http_archive(
     urls = ["https://github.com/google/googletest/archive/refs/tags/release-1.10.0.tar.gz"],
 )
 
+http_archive(
+    name = "com_google_benchmark",
+    sha256 = "1f71c72ce08d2c1310011ea6436b31e39ccab8c2db94186d26657d41747c85d6",
+    strip_prefix = "benchmark-1.6.0",
+    urls = ["https://github.com/google/benchmark/archive/refs/tags/v1.6.0.tar.gz"],
+)

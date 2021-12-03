@@ -1,2 +1,4 @@
 build --cxxopt -std=c++17
+build --cxxopt -DLEVELDB_PLATFORM_POSIX
+build --cxxopt -DLEVELDB_HAS_PORT_CONFIG_H
 build --linkopt -lsnappy

@@ -19,12 +19,23 @@ cc_library(
     exclude = ["doc/**"],
   ),
   includes = ["include"],
-  copts = [
-    '-DLEVELDB_HAS_PORT_CONFIG_H',
-    '-DLEVELDB_PLATFORM_POSIX',
-  ],
   deps = [':init'],
 )
+
+[cc_test(
+    name = src.replace("/", "_").replace(".cc", ""),
+    srcs = [src],
+    deps = [
+        ":leveldb",
+        ":gtest",
+        '@com_google_benchmark//:benchmark_main',
+    ],
+) for src in glob(
+    ["**/*_test.cc"],
+    exclude = [
+      'util/env_windows_test.cc',
+    ],
+)]
 
 cc_library(
   name = 'init',
