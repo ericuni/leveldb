@@ -18,6 +18,7 @@
 #include "table/two_level_iterator.h"
 #include "util/coding.h"
 #include "util/logging.h"
+#include <glog/logging.h>
 
 namespace leveldb {
 
@@ -681,6 +682,11 @@ class VersionSet::Builder {
   }
 
   // Save the current state in *v.
+  // 刚启动打开一个非空的db 时:
+  // 1. levels_ 是从manifest 文件中读取到的各level 文件元数据;
+  // 2. base_ 是空的
+  // 3. 入参v 也是空的
+  // 所以最后就是把从当前db 的文件结构信息都恢复保存到 v 中
   void SaveTo(Version* v) {
     BySmallestKey cmp;
     cmp.internal_comparator = &vset_->icmp_;
