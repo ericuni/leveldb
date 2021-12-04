@@ -69,7 +69,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install libgoogle-perftools-dev libkyotocabinet-dev \
-            libsnappy-dev libsqlite3-dev
+            libsnappy-dev libsqlite3-dev libgoogle-glog-dev
 
     - name: Generate build config
       run: >-
