@@ -1501,6 +1501,8 @@ Status DB::Open(const Options& options, const std::string& dbname, DB** dbptr) {
   // Recover handles create_if_missing, error_if_exists
   bool save_manifest = false;
   Status s = impl->Recover(&edit, &save_manifest);
+  // 当options.reuse_logs 为true 时, 如果有log 需要replay, mem_ 有可能是可以继续复用的, 所以这里 impl->mem_ 是有可能不为
+  // nullptr 的
   if (s.ok() && impl->mem_ == nullptr) {
     // Create new log and a corresponding memtable.
     uint64_t new_log_number = impl->versions_->NewFileNumber();
