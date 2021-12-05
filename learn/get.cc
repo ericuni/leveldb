@@ -2,11 +2,11 @@
 #include <glog/logging.h>
 
 #include "leveldb/db.h"
-#include "leveldb/options.h"
 #include "leveldb/filter_policy.h"
+#include "leveldb/options.h"
 
 DEFINE_string(path, "./db", "db path");
-DEFINE_string(key, "key", "");
+DEFINE_string(key, "key", "key_100");
 
 namespace wcg {
 
@@ -22,23 +22,15 @@ int main() {
     return -1;
   }
 
-	leveldb::ReadOptions read_options;
-	auto it = db->NewIterator(read_options);
-  it->Seek(FLAGS_key);
-  auto count = 0;
-	while (it->Valid()) {
-		auto key = it->key();
-		auto value = it->value();
-		LOG(INFO) << key.ToString() << " -> " << value.ToString();
+  leveldb::ReadOptions read_options;
+  std::string value;
+  status = db->Get(read_options, FLAGS_key, &value);
+  if (status.ok()) {
+    LOG(INFO) << "found, and value is " << value;
+  } else {
+    LOG(INFO) << "not found " << status.ToString();
+  }
 
-		it->Next();
-    ++count;
-    if (count >= 5) {
-      break;
-    }
-	}
-
-  delete it;
   delete db;
   return 0;
 }

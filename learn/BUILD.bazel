@@ -1,16 +1,18 @@
 cc_binary(
   name = 'write_db',
   srcs = ['write_db.cc'],
-  deps = [
-    '//:leveldb',
-  ],
+  deps = ['//:leveldb'],
 )
 
 cc_binary(
-  name = 'read_db',
-  srcs = ['read_db.cc'],
-  deps = [
-    '//:leveldb',
-  ],
+  name = 'get',
+  srcs = ['get.cc'],
+  deps = ['//:leveldb'],
+)
+
+cc_binary(
+  name = 'iterate',
+  srcs = ['iterate.cc'],
+  deps = ['//:leveldb'],
 )
 
