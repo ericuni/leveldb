@@ -10,7 +10,7 @@ cc_test(
   deps = ['//:leveldb'],
 )
 
-cc_binary(
+cc_test(
   name = 'iterate',
   srcs = ['iterate.cc'],
   deps = ['//:leveldb'],

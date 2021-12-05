@@ -1,29 +1,26 @@
-#include <gflags/gflags.h>
 #include <glog/logging.h>
+#include <gtest/gtest.h>
 
 #include "leveldb/db.h"
-#include "leveldb/options.h"
 #include "leveldb/filter_policy.h"
+#include "leveldb/options.h"
 
-DEFINE_string(path, "./db", "db path");
-
-namespace wcg {
-
-int main() {
+TEST(iterate, ex) {
   leveldb::Options options;
   options.create_if_missing = true;
   options.filter_policy = leveldb::NewBloomFilterPolicy(10);
 
+  std::string path = "/root/git/leveldb/learn/db";
+  LOG(INFO) << "path : " << path;
+
   leveldb::DB* db = nullptr;
-  auto status = leveldb::DB::Open(options, FLAGS_path, &db);
-  if (!status.ok()) {
-    LOG(ERROR) << "open " << FLAGS_path << " error";
-    return -1;
-  }
+  auto status = leveldb::DB::Open(options, path, &db);
+  ASSERT_TRUE(status.ok()) << status.ToString();
 
   leveldb::ReadOptions read_options;
   auto it = db->NewIterator(read_options);
   it->SeekToFirst();
+
   auto count = 0;
   while (it->Valid()) {
     auto key = it->key();
@@ -36,19 +33,13 @@ int main() {
       break;
     }
   }
+  LOG(INFO) << "kv count: " << count;
 
   delete it;
   delete db;
-  return 0;
 }
 
-}  // namespace wcg
-
-int main(int argc, char* argv[]) {
-  FLAGS_alsologtostderr = true;
-  FLAGS_colorlogtostderr = true;
-  google::InitGoogleLogging(argv[0]);
-  google::ParseCommandLineFlags(&argc, &argv, true);
-
-  return wcg::main();
+int main(int argc, char** argv) {
+  testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
 }
