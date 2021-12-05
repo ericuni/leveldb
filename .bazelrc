@@ -1,2 +1,4 @@
 build --cxxopt -std=c++17
 build --linkopt -lsnappy
+test --sandbox_writable_path=/root/git/leveldb/learn/db
+test --test_output=all

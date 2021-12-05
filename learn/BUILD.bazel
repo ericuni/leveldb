@@ -4,7 +4,7 @@ cc_binary(
   deps = ['//:leveldb'],
 )
 
-cc_binary(
+cc_test(
   name = 'get',
   srcs = ['get.cc'],
   deps = ['//:leveldb'],
