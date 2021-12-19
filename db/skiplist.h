@@ -385,9 +385,9 @@ void SkipList<Key, Comparator>::Insert(const Key& key) {
     // the loop below.  In the former case the reader will
     // immediately drop to the next level since nullptr sorts after all
     // keys.  In the latter case the reader will use the new node.
-    // relaxed ordering 仅仅保证load 和store 是原子操作,除此之外,不提供任何跨线程的同步, 也就是一个线程store, 随后另外一
-    // 个线程也以relaxed 模式来load, 可能读到的是old value, 因为可能是从寄存器或者cpu cache 中读的, 即使是从内存中读的,
-    // 调用store 的线程写的结果也可能还在寄存器或者cpu cache 中而没有刷回内存.
+    // 此处不用为并发读加锁. 因为并发读在(在另外线程中通过 FindGreaterOrEqual 中的 GetMaxHeight)
+    // 读取到更新后跳表层数,但该节点尚未插入时也无妨.因为这意味着它会读到 nullptr,而在 LevelDB
+    // 的 Comparator 设定中,nullptr 比所有 key 都大.因此,FindGreaterOrEqual 会继续往下找, 符合预期.
     max_height_.store(height, std::memory_order_relaxed);
   }
 
@@ -395,7 +395,8 @@ void SkipList<Key, Comparator>::Insert(const Key& key) {
   for (int i = 0; i < height; i++) {
     // NoBarrier_SetNext() suffices since we will add a barrier when
     // we publish a pointer to "x" in prev[i].
-    // 因为外面调用Insert 没有并发问题的, 所以 prev[i]->NoBarrier_Next(i) 也可以用 relaxed
+    // 此句 NoBarrier_SetNext() 版本就够用了,因为后续 prev[i]->SetNext(i, x) 语句会进行强制同步.
+    // 并且为了保证并发读的正确性,一定要先设置本节点指针,再设置原条表中节点(prev)指针
     x->NoBarrier_SetNext(i, prev[i]->NoBarrier_Next(i));
     prev[i]->SetNext(i, x);
   }

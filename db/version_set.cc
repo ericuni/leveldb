@@ -417,6 +417,7 @@ bool Version::UpdateStats(const GetStats& stats) {
     f->allowed_seeks--;
     if (f->allowed_seeks <= 0 && file_to_compact_ == nullptr) {
       file_to_compact_ = f;
+      // FileMetaData 类型里面没有level 信息, 还需要一个单独的变量来保存level
       file_to_compact_level_ = stats.seek_file_level;
       return true;
     }
