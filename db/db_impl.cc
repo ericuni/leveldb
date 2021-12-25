@@ -1079,6 +1079,7 @@ Iterator* DBImpl::NewInternalIterator(const ReadOptions& options,
                                       SequenceNumber* latest_snapshot,
                                       uint32_t* seed) {
   mutex_.Lock();
+  // last sequence 需要和创建iterator 的时候一起拿到, 所也要放在获得锁之后
   *latest_snapshot = versions_->LastSequence();
 
   // Collect together all needed child iterators
