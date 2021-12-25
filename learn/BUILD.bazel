@@ -5,14 +5,8 @@ cc_binary(
 )
 
 cc_test(
-  name = 'get',
-  srcs = ['get.cc'],
-  deps = ['//:leveldb'],
-)
-
-cc_test(
-  name = 'iterate',
-  srcs = ['iterate.cc'],
+  name = 'read_test',
+  srcs = ['read_test.cc'],
   deps = ['//:leveldb'],
 )
 
