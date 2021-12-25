@@ -19,22 +19,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        compiler: [clang, gcc, msvc]
+        compiler: [clang, gcc]
         os: [ubuntu-latest, macos-latest]
         optimized: [true, false]
         exclude:
-        # MSVC only works on Windows.
-        - os: ubuntu-latest
-          compiler: msvc
-        - os: macos-latest
-          compiler: msvc
         # Not testing with GCC on macOS.
         - os: macos-latest
-          compiler: gcc
-        # Only testing with MSVC on Windows.
-        - os: windows-latest
-          compiler: clang
-        - os: windows-latest
           compiler: gcc
         include:
         - compiler: clang
@@ -43,9 +33,6 @@ jobs:
         - compiler: gcc
           CC: gcc
           CXX: g++
-        - compiler: msvc
-          CC:
-          CXX:
 
     env:
       CMAKE_BUILD_DIR: ${{ github.workspace }}/build
