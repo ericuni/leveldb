@@ -20,12 +20,8 @@ jobs:
       fail-fast: false
       matrix:
         compiler: [clang, gcc]
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest]
         optimized: [true, false]
-        exclude:
-        # Not testing with GCC on macOS.
-        - os: macos-latest
-          compiler: gcc
         include:
         - compiler: clang
           CC: clang
@@ -57,10 +53,6 @@ jobs:
         sudo apt-get update
         sudo apt-get install libgoogle-perftools-dev libkyotocabinet-dev \
             libsnappy-dev libsqlite3-dev libgoogle-glog-dev
-
-    - name: Install dependencies on MacOS
-      if: ${{ runner.os == 'MacOS' }}
-      run: brew install glog
 
     - name: Generate build config
       run: >-
