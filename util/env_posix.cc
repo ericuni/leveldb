@@ -136,7 +136,7 @@ class Limiter {
 class PosixSequentialFile final : public SequentialFile {
  public:
   PosixSequentialFile(std::string filename, int fd)
-      : fd_(fd), filename_(filename) {}
+      : fd_(fd), filename_(std::move(filename)) {}
   ~PosixSequentialFile() override { close(fd_); }
 
   Status Read(size_t n, Slice* result, char* scratch) override {
@@ -242,7 +242,7 @@ class PosixMmapReadableFile final : public RandomAccessFile {
   // over the ownership of the region.
   //
   // |mmap_limiter| must outlive this instance. The caller must have already
-  // aquired the right to use one mmap region, which will be released when this
+  // acquired the right to use one mmap region, which will be released when this
   // instance is destroyed.
   PosixMmapReadableFile(std::string filename, char* mmap_base, size_t length,
                         Limiter* mmap_limiter)
@@ -756,7 +756,7 @@ class PosixEnv : public Env {
   // Instances are constructed on the thread calling Schedule() and used on the
   // background thread.
   //
-  // This structure is thread-safe beacuse it is immutable.
+  // This structure is thread-safe because it is immutable.
   struct BackgroundWorkItem {
     explicit BackgroundWorkItem(void (*function)(void* arg), void* arg)
         : function(function), arg(arg) {}
@@ -870,7 +870,7 @@ class SingletonEnv {
  public:
   SingletonEnv() {
 #if !defined(NDEBUG)
-    env_initialized_.store(true, std::memory_order::memory_order_relaxed);
+    env_initialized_.store(true, std::memory_order_relaxed);
 #endif  // !defined(NDEBUG)
     static_assert(sizeof(env_storage_) >= sizeof(EnvType),
                   "env_storage_ will not fit the Env");
@@ -887,7 +887,7 @@ class SingletonEnv {
 
   static void AssertEnvNotInitialized() {
 #if !defined(NDEBUG)
-    assert(!env_initialized_.load(std::memory_order::memory_order_relaxed));
+    assert(!env_initialized_.load(std::memory_order_relaxed));
 #endif  // !defined(NDEBUG)
   }
 
